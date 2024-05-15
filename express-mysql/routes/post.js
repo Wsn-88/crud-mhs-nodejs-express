@@ -81,7 +81,7 @@ route.post("/store", function (req, res, next) {
     connection.query(
       "INSERT INTO mahasiswa SET ?",
       formData,
-      function (err, results) {
+      function (err, result) {
         if (err) {
           req.flash("error", err);
 
@@ -101,7 +101,7 @@ route.post("/store", function (req, res, next) {
 });
 
 //edit post
-route.get("/edit/(:id)", function (req, res, next) {
+route.get("/edit/:id", function (req, res, next) {
   let id = req.params.id;
 
   connection.query(
@@ -126,98 +126,103 @@ route.get("/edit/(:id)", function (req, res, next) {
       }
     }
   );
+});
 
-  //Update post
-  route.post("/update/:id", function (req, res, next) {
-    let id = req.params.id;
-    let nim = req.body.nim;
-    let nama = req.body.nama;
-    let jurusan = req.body.jurusan;
-    let error = false;
+//Update post
+route.post("/update/:id", function (req, res, next) {
+  let id = req.params.id;
+  let nim = req.body.nim;
+  let nama = req.body.nama;
+  let jurusan = req.body.jurusan;
+  let error = false;
 
-    if (nim.length === 0) {
-      error = true;
+  if (nim.length === 0) {
+    error = true;
 
-      req.flash("error", "silahkan masukkan nim");
-      res.render("posts/edit", {
-        id: id,
-        nim: nim,
-        nama: nama,
-        jurusan: jurusan,
-      });
-    }
+    req.flash("error", "silahkan masukkan nim");
+    res.render("posts/edit", {
+      id: id,
+      nim: nim,
+      nama: nama,
+      jurusan: jurusan,
+    });
+  }
 
-    if (nama.length === 0) {
-      error = true;
+  if (nama.length === 0) {
+    error = true;
 
-      req.flash("error", "silahkan masukkan nim");
-      res.render("posts/edit", {
-        id: id,
-        nim: nim,
-        nama: nama,
-        jurusan: jurusan,
-      });
-    }
+    req.flash("error", "silahkan masukkan nim");
+    res.render("posts/edit", {
+      id: id,
+      nim: nim,
+      nama: nama,
+      jurusan: jurusan,
+    });
+  }
 
-    if (jurusan.length === 0) {
-      error = true;
+  if (jurusan.length === 0) {
+    error = true;
 
-      req.flash("error", "silahkan masukkan nim");
-      res.render("posts/edit", {
-        id: id,
-        nim: nim,
-        nama: nama,
-        jurusan: jurusan,
-      });
-    }
+    req.flash("error", "silahkan masukkan nim");
+    res.render("posts/edit", {
+      id: id,
+      nim: nim,
+      nama: nama,
+      jurusan: jurusan,
+    });
+  }
 
-    //jika tidak ada error
-    if (!error) {
-      let formData = {
-        nim: nim,
-        nama: nama,
-        jurusan: jurusan,
-      };
+  //jika tidak ada error
+  if (!error) {
+    let formData = {
+      nim: nim,
+      nama: nama,
+      jurusan: jurusan,
+    };
 
-      //update query
-      connection.query(
-        "UPDATE mahasiswa SET ? WHERE id = " + id,
-        formData,
-        function (err, results) {
-          if (err) {
-            req.flash("error", err);
-            res.render("posts/edit", {
-              id: id,
-              nim: formData.nim,
-              nama: formData.nama,
-              jurusan: formData.jurusan,
-            });
-          } else {
-            req.flash("success", "Data berhasil di update!");
-            res.redirect("/posts");
-          }
-        }
-      );
-    }
-  });
-
-  //Delete mahasiswa by id
-  route.get("delete/(:id)", function (req, res, next) {
-    let id = req.params.id;
-
+    //update query
     connection.query(
-      "SELECT * FROM mahasiswa WHERE id =",
-      +id,
+      "UPDATE mahasiswa SET ? WHERE id = " + id,
+      formData,
       function (err, results) {
         if (err) {
           req.flash("error", err);
-          res.redirect("/posts");
+          res.render("posts/edit", {
+            id: id,
+            nim: formData.nim,
+            nama: formData.nama,
+            jurusan: formData.jurusan,
+          });
         } else {
-          req.flash("success", "Data berhasil dihapus");
+          req.flash("success", "Data berhasil di update!");
           res.redirect("/posts");
         }
       }
     );
-  });
+  }
 });
+
+route.get("/delete/:id", function (req, res, next) {
+  let id = req.params.id;
+
+  connection.query(
+    "DELETE FROM mahasiswa WHERE id=?",
+    [id],
+    function (err, result) {
+      //if(err) throw err
+      if (err) {
+        // set flash message
+        req.flash("error", err);
+        // redirect to posts page
+        res.redirect("/posts");
+      } else {
+        // set flash message
+        req.flash("success", "Data Berhasil Dihapus!");
+        // redirect to posts page
+        res.redirect("/posts");
+      }
+    }
+  );
+});
+
 module.exports = route;
